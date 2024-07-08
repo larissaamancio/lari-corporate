@@ -7,7 +7,6 @@ yarn-error.log
 dist/
 coverage/
 .angular
-node_modules
 # IDEs and editors
 .idea/
 .vscode/
