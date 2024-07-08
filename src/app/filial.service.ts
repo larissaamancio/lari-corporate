@@ -13,7 +13,7 @@ export class FilialService {
 
   constructor(private http: HttpClient) { }
 
-  getFiliais() {
+  getFiliais(): Observable<any> {
     const headers = this.headers
     return this.http.get(this.filiaisUrl + 'filial',
       { headers });

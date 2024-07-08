@@ -15,6 +15,7 @@ export interface Responsible {
 }
 
 export interface Process {
+  id: string;
   cep: string;
   street: string;
   city: string;
@@ -23,4 +24,6 @@ export interface Process {
   destiny: string;
   deadline: string;
   description: string;
+  accept: boolean;
+  acceptAt: Date;
 }

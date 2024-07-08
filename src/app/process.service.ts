@@ -16,4 +16,16 @@ export class ProcessService {
     return this.http.post(this.filiaisUrl + 'process', body,
       { headers });
   }
+
+  getAll(): Observable<any> {
+    const headers = this.headers
+    return this.http.get(this.filiaisUrl + 'process',
+      { headers });
+  }
+
+  update(body: any): Observable<any> {
+    const headers = this.headers
+    return this.http.put(this.filiaisUrl + 'process/'+ body.id, body,
+      { headers });
+  }
 }

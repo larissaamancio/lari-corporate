@@ -9,11 +9,14 @@ import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { FilialService } from '../filial.service';
-import { Filial, Responsible } from '../new-filial/filial';
+import { Filial, Process, Responsible } from '../new-filial/filial';
 import { CalendarModule } from 'primeng/calendar';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ProcessService } from '../process.service';
 import { ViaCepService } from '../cep.service';
+import { MessageService } from "primeng/api";
+import { Subject, takeUntil } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-new-process',
@@ -24,12 +27,15 @@ import { ViaCepService } from '../cep.service';
     InputTextModule,
     DropdownModule,
     CalendarModule,
-    InputTextareaModule
+    InputTextareaModule,
+    ToastModule
   ],
+  providers:[MessageService, ViaCepService],
   templateUrl: './new-process.component.html',
   styleUrl: './new-process.component.css'
 })
 export class NewProcessComponent implements OnInit {
+  private destroy$ = new Subject<void>();
   filiais!: any;
   minDate!: any;
 
@@ -38,10 +44,13 @@ export class NewProcessComponent implements OnInit {
     street: [{value: '', disabled: true}, Validators.required],
     city: [{value: '', disabled: true}, Validators.required],
     state: [{value: '', disabled: true}, Validators.required],
-    number: [''],
-    destiny: [''],
-    deadline: [''],
-    description: [''],
+    number: ['', Validators.required],
+    destiny: ['', Validators.required],
+    deadline: ['', Validators.required],
+    description: ['', Validators.required],
+    createdAt: [new Date(), Validators.required],
+    accept: [''],
+    acceptAt: ['']
   });
 
   constructor(
@@ -49,6 +58,7 @@ export class NewProcessComponent implements OnInit {
     private formBuilder: FormBuilder,
     private processService: ProcessService,
     private cepService: ViaCepService,
+    private messageService: MessageService
   ){}
 
   ngOnInit(): void {
@@ -61,10 +71,24 @@ export class NewProcessComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(`jjjjj`);
     this.processService
-      .create(this.form.value)
-      .subscribe((teste) => console.log(teste));
+      .create(this.form.value).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: Process) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Processo de entrega cadastrado com sucesso.'
+          })
+        },
+        error: (e) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: '',
+            detail: 'Processo de entrega nao cadastrado.' + e
+          })
+        },
+      });
   }
 
   fetchAddress() {
@@ -80,6 +104,10 @@ export class NewProcessComponent implements OnInit {
         }
       });
     }
+  }
+
+  ngOnDestroy(){
+    this.destroy$.next();
   }
 
 }
